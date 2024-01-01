@@ -110,22 +110,64 @@ jar {
     }
 }
 
+task sourcesJar(type: Jar, dependsOn: classes) {
+    from sourceSets.main.allSource
+    archiveClassifier.set('sources')
+}
 
-/*jar.finalizedBy('reobfJar')
+task deobfJar(type: Jar) {
+    from sourceSets.main.output
+    archiveClassifier.set('deobf')
+}
+
+artifacts {
+    archives sourcesJar
+    archives deobfJar
+}
+
+def getPrivateString(String key) {
+    File propFile = file("private.properties")
+    if (propFile.exists()) {
+        Properties props = new Properties()
+        props.load(new FileInputStream(propFile))
+        if ((props[key]).isEmpty()) {
+            return "NULL"
+        } else return props[key]
+    } else {
+        return "NULL"
+    }
+}
+
+
+jar.finalizedBy('reobfJar')
 publish.dependsOn('reobfJar')
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
             artifact jar
+            artifact deobfJar
+            artifact sourcesJar
         }
     }
     repositories {
+//        maven {
+//            name = "TeamMoeg"
+//            url = "http://server.teammoeg.com:8888/releases"
+//            credentials {
+//                username = getPrivateString("mavenUser")
+//                password = getPrivateString("mavenToken")
+//            }
+//            authentication {
+//                basic(BasicAuthentication)
+//            }
+//        }
         maven {
-            url "file:///${project.projectDir}/mcmodsrepo"
+            name = "COS"
+            url = "http://127.0.0.1:9999"
         }
     }
-}*/
+}
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
